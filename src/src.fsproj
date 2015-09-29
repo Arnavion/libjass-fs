@@ -26,12 +26,13 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>6f6fccce-bbfc-4627-a7d9-b170e2e4aa6b</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ass_parser</RootNamespace>
-    <AssemblyName>ass_parser</AssemblyName>
+    <RootNamespace>libjass</RootNamespace>
+    <AssemblyName>libjass_fs</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <Name>ass-parser</Name>
+    <Name>src</Name>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,7 +43,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\ass_parser.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\libjass_fs.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -53,7 +54,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\ass_parser.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\libjass_fs.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
@@ -75,11 +76,10 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <None Include="App.config" />
-    <Compile Include="src\platform.fs" />
-    <Compile Include="src\types\index.fs" />
-    <Compile Include="src\parser\parse.fs" />
-    <Compile Include="src\parser\index.fs" />
-    <Compile Include="program.fs" />
+    <Compile Include="platform.fs" />
+    <Compile Include="types\index.fs" />
+    <Compile Include="parser\parse.fs" />
+    <Compile Include="parser\index.fs" />
     <Compile Include="js-compiler.fs" />
   </ItemGroup>
   <ItemGroup>
@@ -91,10 +91,13 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="FunScript">
-      <HintPath>.\FunScript\FunScript.dll</HintPath>
+      <HintPath>..\FunScript\FunScript.dll</HintPath>
     </Reference>
     <Reference Include="FunScript.Interop">
-      <HintPath>.\FunScript\FunScript.Interop.dll</HintPath>
+      <HintPath>..\FunScript\FunScript.Interop.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <PropertyGroup>
+    <PostBuildEvent>"$(TargetPath)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

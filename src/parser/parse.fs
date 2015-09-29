@@ -97,7 +97,7 @@ let private (|AsHexInt32|_|) (str: string): (int * string) option =
 
     match rest with
     | RegexMatch "[0-9a-fA-F]+" (value, rest) ->
-        match platform.StringToHexInt32 isNegative value with
+        match platform.Managed.StringToHexInt32 isNegative value with
         | Some value -> Some (value, rest)
         | None -> None
     | _ -> None
@@ -700,7 +700,7 @@ type ParserRule =
     | DialogueParts = 0
 
 
-let parse (str: string) (rule: ParserRule): Part list option =
+let parse (rule: ParserRule) (str: string): Part list option =
     match rule with
     | ParserRule.DialogueParts ->
         str

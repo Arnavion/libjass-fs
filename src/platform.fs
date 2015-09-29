@@ -20,7 +20,21 @@
 
 #light
 
-module js_compiler
+module platform
+
+module Managed =
+    let StringToHexInt32 (isNegative: bool) (str: string): int option =
+        try
+            (System.Convert.ToInt64(str, 16))
+            |> fun value -> if isNegative then -value else value
+            |> fun value ->
+                if value < int64 System.Int32.MinValue then System.Int32.MinValue
+                else if value > int64 System.Int32.MaxValue then System.Int32.MaxValue
+                else int value
+            |> Some
+        with
+        | :? System.OverflowException -> Some 0xFFFFFFFF
+        | _ -> None
 
 
 [<FunScript.JS>]
@@ -48,18 +62,3 @@ module Native =
 
     [<FunScript.JSEmitInline("{0}")>]
     let Operator_enum<'U> (value: int32): 'U = failwith "never"
-
-
-match program.main() with
-| Some parts -> List.map (printfn "%A") parts |> ignore
-| None -> eprintfn "Parse failed!"
-
-let source = FunScript.Compiler.Compiler.Compile(<@ program.main() @>, noReturn = true, components =
-    [
-        FunScript.ExpressionReplacer.createUnsafe <@ OperatorIntrinsics.GetStringSlice @> <@ Native.OperatorIntrinsics_GetStringSlice @>
-        FunScript.ExpressionReplacer.createUnsafe <@ platform.StringToHexInt32 @> <@ Native.StringToHexInt32 @>
-        FunScript.ExpressionReplacer.createUnsafe <@ fun (value: int32) -> enum<SourceConstructFlags> value @> <@ Native.Operator_enum @>
-        FunScript.ExpressionReplacer.createUnsafe <@ fun (value: char) -> System.Convert.ToInt32(value) @> <@ Native.Convert_ToInt32 @>
-    ])
-
-System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location), "libjass.js"), source)

@@ -7,7 +7,7 @@ An F# port of some of [libjass](https://github.com/Arnavion/libjass) that uses F
 REM In "Developer Command Prompt for VS 2015"
 msbuild .\libjass-fs.sln
 .\libjass-fs\bin\Debug\libjass-fs.exe
-REM Now have .\libjass-fs\bin\Debug\libjass.js
+REM Now have .\src\bin\Debug\libjass.js
 ```
 
 
@@ -34,5 +34,3 @@ limitations under the License.
 ```
 
 FunScript is used to compile the code to JavaScript and is available under the Apache-2.0 license.
-
-FunScript binaries are checked in under FunScript/ since the Nuget package is old (1.1.94 from May 2015 as of this writing) and doesn't contain [a required fix](https://github.com/ZachBray/FunScript/commit/2e48b851e735fd1a246d70c36fa1d2a76add5442). If you wish to build it yourself then use that commit or later.

@@ -1,4 +1,4 @@
-*.csproj.user
+/.vs
 /*.suo
 **/bin/
 **/obj/

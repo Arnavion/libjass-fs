@@ -18,7 +18,7 @@
  * limitations under the License.
  *)
 
-namespace ass_parser.AssemblyInfo
+namespace libjass.AssemblyInfo
 
 open System.Reflection
 open System.Runtime.CompilerServices
@@ -27,11 +27,11 @@ open System.Runtime.InteropServices
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[<assembly: AssemblyTitle("ass-parser")>]
+[<assembly: AssemblyTitle("libjass-fs")>]
 [<assembly: AssemblyDescription("")>]
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("")>]
-[<assembly: AssemblyProduct("ass-parser")>]
+[<assembly: AssemblyProduct("libjass-fs")>]
 [<assembly: AssemblyCopyright("Copyright ©  2015")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]

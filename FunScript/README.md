@@ -1,0 +1,1 @@
+FunScript binaries are checked in here since the Nuget package is old (1.1.94 from May 2015 as of this writing) and doesn't contain [a required fix](https://github.com/ZachBray/FunScript/commit/2e48b851e735fd1a246d70c36fa1d2a76add5442). If you wish to build it yourself then use that commit or later.
