@@ -81,7 +81,6 @@
     <Compile Include="src\parser\index.fs" />
     <Compile Include="program.fs" />
     <Compile Include="js-compiler.fs" />
-    <Content Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
