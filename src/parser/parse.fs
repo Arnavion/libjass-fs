@@ -542,11 +542,14 @@ let rec private AsTransformableTags_rec (result: TransformableTag list) (str: st
     | s when s.Length = 0 -> Some (result, str)
     | StartsWith ")" rest -> Some (result, rest)
     | StartsWith "}" rest -> Some (result, rest)
-    | StartsWith "\\" (AsTransformableTag (tag, rest)) -> AsTransformableTags_rec (result @ [tag]) rest
+    | StartsWith "\\" (AsTransformableTag (tag, rest)) -> AsTransformableTags_rec (tag :: result) rest
     | _ -> None
 
 
-let private (|AsTransformableTags|_|) (str: string): (TransformableTag list * string) option = AsTransformableTags_rec [] str
+let private (|AsTransformableTags|_|) (str: string): (TransformableTag list * string) option =
+    match AsTransformableTags_rec [] str with
+    | Some (result, rest) -> Some (result |> List.rev, rest)
+    | None -> None
 
 
 (*
@@ -662,15 +665,15 @@ let rec private parse_rec (result: Part list) (str: string): Part list =
     match str with
     | s when s.Length = 0 -> result
     | StartsWith "{" rest -> parse_rec_braces result rest
-    | _ -> parse_rec (result @ [Text { value = str.[0..0] }]) str.[1..]
+    | _ -> parse_rec (Text { value = str.[0..0] } :: result) str.[1..]
 
 
 and private parse_rec_braces (result: Part list) (str: string): Part list =
     match str with
     | s when s.Length = 0 -> result
     | StartsWith "}" rest -> parse_rec result rest
-    | StartsWith "\\" (AsAnyTag (tag, rest)) -> parse_rec_braces (result @ [tag]) rest
-    | _ -> parse_rec_braces (result @ [Comment { value = str.[0..0] }]) str.[1..]
+    | StartsWith "\\" (AsAnyTag (tag, rest)) -> parse_rec_braces (tag :: result) rest
+    | _ -> parse_rec_braces (Comment { value = str.[0..0] } :: result) str.[1..]
 
 
 type private Mergeable =
@@ -682,18 +685,18 @@ let rec private mergeAdjacent (result: Part list) (lastSeen: Mergeable option) (
     match parts with
     | [] ->
         match lastSeen with
-        | Some (Mergeable.Text text) -> result @ [Part.Text text]
-        | Some (Mergeable.Comment comment) -> result @ [Part.Comment comment]
+        | Some (Mergeable.Text text) -> Part.Text text :: result
+        | Some (Mergeable.Comment comment) -> Part.Comment comment :: result
         | None -> result
     | current :: rest ->
         match lastSeen, current with
         | None, Part.Text t -> mergeAdjacent result (Some (Mergeable.Text t)) rest
         | None, Part.Comment c -> mergeAdjacent result (Some (Mergeable.Comment c)) rest
-        | None, other -> mergeAdjacent (result @ [other]) None rest
-        | Some (Mergeable.Text t1), Part.Text t2 -> mergeAdjacent result (Some (Mergeable.Text { value = t1.value + t2.value })) rest
-        | Some (Mergeable.Text t), other -> mergeAdjacent (result @ [Part.Text t]) None parts
-        | Some (Mergeable.Comment c1), Part.Comment c2 -> mergeAdjacent result (Some (Mergeable.Comment { value = c1.value + c2.value })) rest
-        | Some (Mergeable.Comment c), other -> mergeAdjacent (result @ [Part.Comment c]) None parts
+        | None, other -> mergeAdjacent (other :: result) None rest
+        | Some (Mergeable.Text t1), Part.Text t2 -> mergeAdjacent result (Some (Mergeable.Text { value = t2.value + t1.value })) rest
+        | Some (Mergeable.Text t), other -> mergeAdjacent (Part.Text t :: result) None parts
+        | Some (Mergeable.Comment c1), Part.Comment c2 -> mergeAdjacent result (Some (Mergeable.Comment { value = c2.value + c1.value })) rest
+        | Some (Mergeable.Comment c), other -> mergeAdjacent (Part.Comment c :: result) None parts
 
 
 type ParserRule =
