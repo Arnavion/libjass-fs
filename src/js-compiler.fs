@@ -32,8 +32,7 @@ let main args =
             FunScript.ExpressionReplacer.createUnsafe <@ fun (value: char) -> System.Convert.ToInt32(value) @> <@ platform.Native.Convert_ToInt32 @>
         ])
 
-    let wrapped = sprintf """
-/**
+    let wrapped = sprintf """/**
  * libjass-fs
  *
  * https://github.com/Arnavion/libjass-fs
