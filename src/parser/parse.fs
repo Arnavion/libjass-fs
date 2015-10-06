@@ -357,10 +357,7 @@ let private (|As_ko_tag|_|) (str: string): (OutlineKaraoke * string) option =
 let private As_move_tag_6 (move: Move) (str: string): (Move * string) option =
     match str with
     | AsDecimal (t1, StartsWith "," (AsDecimal (t2, StartsWith ")" rest))) ->
-        Some ({
-            x1 = move.x1; y1 = move.y1; x2 = move.x2; y2 = move.y2;
-            t1 = Some (t1 / 1000.0); t2 = Some (t2 / 1000.0);
-        }, rest)
+        Some ({ move with t1 = Some (t1 / 1000.0); t2 = Some (t2 / 1000.0); }, rest)
     | _ -> None
 
 
