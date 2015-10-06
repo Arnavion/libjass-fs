@@ -176,62 +176,54 @@ let private (|AsHardSpacePart|_|) (str: string): (Text * string) option =
     | _ -> None
 
 
-let private As_optional_value (tagName: string) (|Matcher|_|) (str: string) =
+let private As_optional_value (tagName: string) ((|Matcher|_|): string -> ('value * string) option) (ctor: 'value option -> 'part) (str: string): ('part * string) option =
     match str with
     | StartsWith tagName rest ->
         match rest with
         | Matcher (value, rest) ->
-            Some (Some value, rest)
+            Some (ctor (Some value), rest)
         | _ ->
-            Some (None, rest)
+            Some (ctor None, rest)
     | _ -> None
 
 
-let private As_required_value (tagName: string) (|Matcher|_|) (str: string) =
+let private As_required_value (tagName: string) ((|Matcher|_|): string -> ('value * string) option) (ctor: 'value -> 'part) (str: string): ('part * string) option =
     match str with
     | StartsWith tagName (Matcher (value, rest)) ->
-        Some (value, rest)
+        Some (ctor value, rest)
     | _ -> None
 
 
 let private (|As_1a_tag|_|) (str: string): (PrimaryAlpha * string) option =
-    As_optional_value "1a" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "1a" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_1c_tag|_|) (str: string): (PrimaryColor * string) option =
-    As_optional_value "1c" (|AsColorValue|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "1c" (|AsColorValue|_|) (fun value -> { value = value }) str
 
 
 let private (|As_2a_tag|_|) (str: string): (SecondaryAlpha * string) option =
-    As_optional_value "2a" (|AsAlphaValue|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "2a" (|AsAlphaValue|_|) (fun value -> { value = value }) str
 
 
 let private (|As_2c_tag|_|) (str: string): (SecondaryColor * string) option =
-    As_optional_value "2c" (|AsColorValue|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "2c" (|AsColorValue|_|) (fun value -> { value = value }) str
 
 
 let private (|As_3a_tag|_|) (str: string): (OutlineAlpha * string) option =
-    As_optional_value "3a" (|AsAlphaValue|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "3a" (|AsAlphaValue|_|) (fun value -> { value = value }) str
 
 
 let private (|As_3c_tag|_|) (str: string): (OutlineColor * string) option =
-    As_optional_value "3c" (|AsColorValue|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "3c" (|AsColorValue|_|) (fun value -> { value = value }) str
 
 
 let private (|As_4a_tag|_|) (str: string): (ShadowAlpha * string) option =
-    As_optional_value "4a" (|AsAlphaValue|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "4a" (|AsAlphaValue|_|) (fun value -> { value = value }) str
 
 
 let private (|As_4c_tag|_|) (str: string): (ShadowColor * string) option =
-    As_optional_value "4c" (|AsColorValue|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "4c" (|AsColorValue|_|) (fun value -> { value = value }) str
 
 
 let private (|As_a_tag|_|) (str: string): (Alignment * string) option =
@@ -243,38 +235,31 @@ let private (|As_a_tag|_|) (str: string): (Alignment * string) option =
 
 
 let private (|As_alpha_tag|_|) (str: string): (Alpha * string) option =
-    As_optional_value "alpha" (|AsAlphaValue|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "alpha" (|AsAlphaValue|_|) (fun value -> { value = value }) str
 
 
 let private (|As_an_tag|_|) (str: string): (Alignment * string) option =
-    As_required_value "an" (|AsAlignmentValue|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_required_value "an" (|AsAlignmentValue|_|) (fun value -> { value = value }) str
 
 
 let private (|As_b_tag|_|) (str: string): (Bold * string) option =
-    As_optional_value "b" (|AsBoldValue|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "b" (|AsBoldValue|_|) (fun value -> { value = value }) str
 
 
 let private (|As_be_tag|_|) (str: string): (Blur * string) option =
-    As_optional_value "be" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "be" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_blur_tag|_|) (str: string): (GaussianBlur * string) option =
-    As_optional_value "blur" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "blur" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_bord_tag|_|) (str: string): (Border * string) option =
-    As_optional_value "bord" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "bord" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_c_tag|_|) (str: string): (PrimaryColor * string) option =
-    As_optional_value "c" (|AsColorValue|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "c" (|AsColorValue|_|) (fun value -> { value = value }) str
 
 
 let private (|As_fad_tag|_|) (str: string): (Fade * string) option =
@@ -298,93 +283,75 @@ let private (|As_fade_tag|_|) (str: string): (ComplexFade * string) option =
 
 
 let private (|As_fax_tag|_|) (str: string): (SkewX * string) option =
-    As_optional_value "fax" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "fax" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_fay_tag|_|) (str: string): (SkewY * string) option =
-    As_optional_value "fay" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "fay" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_fn_tag|_|) (str: string): (FontName * string) option =
-    As_optional_value "fn" ((|RegexMatch|_|) "[^\\\}]+") str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "fn" ((|RegexMatch|_|) "[^\\\}]+") (fun value -> { value = value }) str
 
 
 let private (|As_fr_tag|_|) (str: string): (RotateZ * string) option =
-    As_optional_value "fr" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "fr" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_frx_tag|_|) (str: string): (RotateX * string) option =
-    As_optional_value "frx" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "frx" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_fry_tag|_|) (str: string): (RotateY * string) option =
-    As_optional_value "fry" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "fry" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_frz_tag|_|) (str: string): (RotateZ * string) option =
-    As_optional_value "frz" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "frz" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_fs_tag|_|) (str: string): (FontSize * string) option =
-    As_optional_value "fs" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "fs" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_fscx_tag|_|) (str: string): (FontScaleX * string) option =
-    As_optional_value "fscx" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value |> Option.map (fun value -> value / 100.0) }, rest))
+    As_optional_value "fscx" (|AsDecimal|_|) (fun value -> { value = value |> Option.map (fun value -> value / 100.0) }) str
 
 
 let private (|As_fscy_tag|_|) (str: string): (FontScaleY * string) option =
-    As_optional_value "fscy" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value |> Option.map (fun value -> value / 100.0) }, rest))
+    As_optional_value "fscy" (|AsDecimal|_|) (fun value -> { value = value |> Option.map (fun value -> value / 100.0) }) str
 
 
 let private (|As_fsp_tag|_|) (str: string): (LetterSpacing * string) option =
-    As_optional_value "fsp" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "fsp" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_fsplus_tag|_|) (str: string): (FontSizePlus * string) option =
-    As_required_value "fs+" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_required_value "fs+" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_fsminus_tag|_|) (str: string): (FontSizeMinus * string) option =
-    As_required_value "fs-" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_required_value "fs-" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_i_tag|_|) (str: string): (Italic * string) option =
-    As_optional_value "i" (|AsEnableDisable|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "i" (|AsEnableDisable|_|) (fun value -> { value = value }) str
 
 
 let private (|As_K_tag|_|) (str: string): (SweepingColorKaraoke * string) option =
-    As_required_value "K" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ duration = value / 100.0 }, rest))
+    As_required_value "K" (|AsDecimal|_|) (fun value -> { duration = value / 100.0 }) str
 
 
 let private (|As_k_tag|_|) (str: string): (ColorKaraoke * string) option =
-    As_required_value "k" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ duration = value / 100.0 }, rest))
+    As_required_value "k" (|AsDecimal|_|) (fun value -> { duration = value / 100.0 }) str
 
 
 let private (|As_kf_tag|_|) (str: string): (SweepingColorKaraoke * string) option =
-    As_required_value "kf" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ duration = value / 100.0 }, rest))
+    As_required_value "kf" (|AsDecimal|_|) (fun value -> { duration = value / 100.0 }) str
 
 
 let private (|As_ko_tag|_|) (str: string): (OutlineKaraoke * string) option =
-    As_required_value "ko" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ duration = value / 100.0 }, rest))
+    As_required_value "ko" (|AsDecimal|_|) (fun value -> { duration = value / 100.0 }) str
 
 
 let private As_move_tag_6 (move: Move) (str: string): (Move * string) option =
@@ -421,8 +388,7 @@ let private (|As_org_tag|_|) (str: string): (RotationOrigin * string) option =
 
 
 let private (|As_p_tag|_|) (str: string): (DrawingMode * string) option =
-    As_required_value "p" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ scale = value }, rest))
+    As_required_value "p" (|AsDecimal|_|) (fun value -> { scale = value }) str
 
 
 let private (|As_q_tag|_|) (str: string): (WrappingStyle * string) option =
@@ -436,8 +402,7 @@ let private (|As_q_tag|_|) (str: string): (WrappingStyle * string) option =
 
 
 let private (|As_pbo_tag|_|) (str: string): (DrawingBaselineOffset * string) option =
-    As_required_value "pbo" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_required_value "pbo" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_pos_tag|_|) (str: string): (Position * string) option =
@@ -448,43 +413,35 @@ let private (|As_pos_tag|_|) (str: string): (Position * string) option =
 
 
 let private (|As_r_tag|_|) (str: string): (Reset * string) option =
-    As_optional_value "r" ((|RegexMatch|_|) "[^\\\}]+") str
-    |> Option.map (fun (value, rest) -> ({ styleName = value }, rest))
+    As_optional_value "r" ((|RegexMatch|_|) "[^\\\}]+") (fun value -> { styleName = value }) str
 
 
 let private (|As_s_tag|_|) (str: string): (StrikeThrough * string) option =
-    As_optional_value "s" (|AsEnableDisable|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "s" (|AsEnableDisable|_|) (fun value -> { value = value }) str
 
 
 let private (|As_shad_tag|_|) (str: string): (Shadow * string) option =
-    As_optional_value "shad" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "shad" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_xbord_tag|_|) (str: string): (BorderX * string) option =
-    As_optional_value "xbord" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "xbord" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_xshad_tag|_|) (str: string): (ShadowX * string) option =
-    As_optional_value "xshad" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "xshad" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_ybord_tag|_|) (str: string): (BorderY * string) option =
-    As_optional_value "ybord" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "ybord" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_yshad_tag|_|) (str: string): (ShadowY * string) option =
-    As_optional_value "yshad" (|AsDecimal|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "yshad" (|AsDecimal|_|) (fun value -> { value = value }) str
 
 
 let private (|As_u_tag|_|) (str: string): (Underline * string) option =
-    As_optional_value "u" (|AsEnableDisable|_|) str
-    |> Option.map (fun (value, rest) -> ({ value = value }, rest))
+    As_optional_value "u" (|AsEnableDisable|_|) (fun value -> { value = value }) str
 
 
 let private (|AsTransformableTag|_|) (str: string): (TransformableTag * string) option =
