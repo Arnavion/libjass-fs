@@ -113,21 +113,21 @@ let private (|AsDecimalOrHexInt32|_|) (str: string): (int * string) option =
 
 let private (|AsAlphaValue|_|) (str: string): (float * string) option =
     match str with
-    | ZeroOrMoreOf (set ['&'; 'H']) (AsHexInt32 (value, ZeroOrMoreOf (set ['&'; 'H']) rest)) ->
+    | ZeroOrMoreOf (set [|'&'; 'H'|]) (AsHexInt32 (value, ZeroOrMoreOf (set [|'&'; 'H'|]) rest)) ->
         Some ((1.0 - (float (value &&& 0xFF) / 255.0)), rest)
     | _ -> None
 
 
 let private (|AsColorValue|_|) (str: string): (Color * string) option =
     match str with
-    | ZeroOrMoreOf (set ['&'; 'H']) (AsHexInt32 (value, ZeroOrMoreOf (set ['&'; 'H']) rest)) ->
+    | ZeroOrMoreOf (set [|'&'; 'H'|]) (AsHexInt32 (value, ZeroOrMoreOf (set [|'&'; 'H'|]) rest)) ->
         Some ({ red = value &&& 0xFF; green = (value >>> 8) &&& 0xFF; blue = (value >>> 16) &&& 0xFF; alpha = 1.0; }, rest)
     | _ -> None
 
 
 let private (|AsColorWithAlphaValue|_|) (str: string): (Color * string) option =
     match str with
-    | ZeroOrMoreOf (set ['&'; 'H']) (AsDecimalOrHexInt32 (value, ZeroOrMoreOf (set ['&'; 'H']) rest)) ->
+    | ZeroOrMoreOf (set [|'&'; 'H'|]) (AsDecimalOrHexInt32 (value, ZeroOrMoreOf (set [|'&'; 'H'|]) rest)) ->
         Some ({ red = value &&& 0xFF; green = (value >>> 8) &&& 0xFF; blue = (value >>> 16) &&& 0xFF; alpha = 1.0 - float ((value >>> 24) &&& 0xFF) / 255.0; }, rest)
     | _ -> None
 
