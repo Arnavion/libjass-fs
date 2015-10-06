@@ -62,3 +62,9 @@ module Native =
 
     [<FunScript.JSEmitInline("{0}")>]
     let Operator_enum<'U> (value: int32): 'U = failwith "never"
+
+    [<FunScript.JSEmitInline("{1}.has({0})")>]
+    let Set_contains (element: 'T) (set: Set<'T>): bool = failwith "never"
+
+    [<FunScript.JSEmitInline("new Set({0})")>]
+    let Set_ofArray (array: 'a array): Set<'a> = failwith "never"

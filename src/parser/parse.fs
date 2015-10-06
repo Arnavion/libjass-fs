@@ -45,7 +45,7 @@ let private (|RegexMatch|_|) (pattern: string) (str: string): (string * string) 
 
 let rec private ZeroOrMoreOf_rec (``of``: Set<char>) (str: string): string =
     if str.Length = 0 then str else
-    if ``of``.Contains str.[0] then ZeroOrMoreOf_rec ``of`` str.[1..]
+    if Set.contains str.[0] ``of`` then ZeroOrMoreOf_rec ``of`` str.[1..]
     else str
 
 let rec private (|ZeroOrMoreOf|_|) (``of``: Set<char>) (str: string): string option =
@@ -113,21 +113,21 @@ let private (|AsDecimalOrHexInt32|_|) (str: string): (int * string) option =
 
 let private (|AsAlphaValue|_|) (str: string): (float * string) option =
     match str with
-    | ZeroOrMoreOf (set [|'&'; 'H'|]) (AsHexInt32 (value, ZeroOrMoreOf (set [|'&'; 'H'|]) rest)) ->
+    | ZeroOrMoreOf (Set.ofArray [|'&'; 'H'|]) (AsHexInt32 (value, ZeroOrMoreOf (Set.ofArray [|'&'; 'H'|]) rest)) ->
         Some ((1.0 - (float (value &&& 0xFF) / 255.0)), rest)
     | _ -> None
 
 
 let private (|AsColorValue|_|) (str: string): (Color * string) option =
     match str with
-    | ZeroOrMoreOf (set [|'&'; 'H'|]) (AsHexInt32 (value, ZeroOrMoreOf (set [|'&'; 'H'|]) rest)) ->
+    | ZeroOrMoreOf (Set.ofArray [|'&'; 'H'|]) (AsHexInt32 (value, ZeroOrMoreOf (Set.ofArray [|'&'; 'H'|]) rest)) ->
         Some ({ red = value &&& 0xFF; green = (value >>> 8) &&& 0xFF; blue = (value >>> 16) &&& 0xFF; alpha = 1.0; }, rest)
     | _ -> None
 
 
 let private (|AsColorWithAlphaValue|_|) (str: string): (Color * string) option =
     match str with
-    | ZeroOrMoreOf (set [|'&'; 'H'|]) (AsDecimalOrHexInt32 (value, ZeroOrMoreOf (set [|'&'; 'H'|]) rest)) ->
+    | ZeroOrMoreOf (Set.ofArray [|'&'; 'H'|]) (AsDecimalOrHexInt32 (value, ZeroOrMoreOf (Set.ofArray [|'&'; 'H'|]) rest)) ->
         Some ({ red = value &&& 0xFF; green = (value >>> 8) &&& 0xFF; blue = (value >>> 16) &&& 0xFF; alpha = 1.0 - float ((value >>> 24) &&& 0xFF) / 255.0; }, rest)
     | _ -> None
 

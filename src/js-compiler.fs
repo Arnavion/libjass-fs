@@ -30,6 +30,8 @@ let main args =
             FunScript.ExpressionReplacer.createUnsafe <@ platform.Managed.StringToHexInt32 @> <@ platform.Native.StringToHexInt32 @>
             FunScript.ExpressionReplacer.createUnsafe <@ fun (value: int32) -> enum<SourceConstructFlags> value @> <@ platform.Native.Operator_enum @>
             FunScript.ExpressionReplacer.createUnsafe <@ fun (value: char) -> System.Convert.ToInt32(value) @> <@ platform.Native.Convert_ToInt32 @>
+            FunScript.ExpressionReplacer.createUnsafe <@ Set.contains @> <@ platform.Native.Set_contains @>
+            FunScript.ExpressionReplacer.createUnsafe <@ Set.ofArray @> <@ platform.Native.Set_ofArray @>
         ])
 
     let wrapped = sprintf """/**
