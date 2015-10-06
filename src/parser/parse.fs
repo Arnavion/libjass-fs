@@ -176,14 +176,6 @@ let private (|AsHardSpacePart|_|) (str: string): (Text * string) option =
     | _ -> None
 
 
-let private (|AsTextPart|_|) (str: string): (Text * string) option =
-    Some ({ value = str.[0..0] }, str.[1..])
-
-
-let private (|AsCommentPart|_|) (str: string): (Comment * string) option =
-    Some ({ value = str.[0..0] }, str.[1..])
-
-
 let private As_optional_value (tagName: string) (|Matcher|_|) (str: string) =
     match str with
     | StartsWith tagName rest ->
