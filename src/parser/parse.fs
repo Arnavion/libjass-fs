@@ -391,16 +391,6 @@ let private (|As_p_tag|_|) (str: string): (DrawingMode * string) option =
     As_required_value "p" (|AsDecimal|_|) (fun value -> { scale = value }) str
 
 
-let private (|As_q_tag|_|) (str: string): (WrappingStyle * string) option =
-    match str with
-    | StartsWith "q" rest ->
-        if rest.Length = 0 then None else
-        match rest.[0] with
-        | c when c >= '0' && c <= '3' -> Some ({ value = enum<WrappingStyleValue> (System.Convert.ToInt32 c - System.Convert.ToInt32 '0') }, rest.[1..])
-        | _ -> None
-    | _ -> None
-
-
 let private (|As_pbo_tag|_|) (str: string): (DrawingBaselineOffset * string) option =
     As_required_value "pbo" (|AsDecimal|_|) (fun value -> { value = value }) str
 
@@ -409,6 +399,16 @@ let private (|As_pos_tag|_|) (str: string): (Position * string) option =
     match str with
     | StartsWith "pos(" (AsDecimal (x, StartsWith "," (AsDecimal (y, StartsWith ")" rest)))) ->
         Some ({ x = x; y = y; }, rest)
+    | _ -> None
+
+
+let private (|As_q_tag|_|) (str: string): (WrappingStyle * string) option =
+    match str with
+    | StartsWith "q" rest ->
+        if rest.Length = 0 then None else
+        match rest.[0] with
+        | c when c >= '0' && c <= '3' -> Some ({ value = enum<WrappingStyleValue> (System.Convert.ToInt32 c - System.Convert.ToInt32 '0') }, rest.[1..])
+        | _ -> None
     | _ -> None
 
 
@@ -422,6 +422,10 @@ let private (|As_s_tag|_|) (str: string): (StrikeThrough * string) option =
 
 let private (|As_shad_tag|_|) (str: string): (Shadow * string) option =
     As_optional_value "shad" (|AsDecimal|_|) (fun value -> { value = value }) str
+
+
+let private (|As_u_tag|_|) (str: string): (Underline * string) option =
+    As_optional_value "u" (|AsEnableDisable|_|) (fun value -> { value = value }) str
 
 
 let private (|As_xbord_tag|_|) (str: string): (BorderX * string) option =
@@ -438,10 +442,6 @@ let private (|As_ybord_tag|_|) (str: string): (BorderY * string) option =
 
 let private (|As_yshad_tag|_|) (str: string): (ShadowY * string) option =
     As_optional_value "yshad" (|AsDecimal|_|) (fun value -> { value = value }) str
-
-
-let private (|As_u_tag|_|) (str: string): (Underline * string) option =
-    As_optional_value "u" (|AsEnableDisable|_|) (fun value -> { value = value }) str
 
 
 let private (|AsTransformableTag|_|) (str: string): (TransformableTag * string) option =
