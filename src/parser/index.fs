@@ -24,4 +24,4 @@
 module parser
 
 type ParserRule = _parser_parse.ParserRule
-let parse = _parser_parse.parse
+let parse (rule: ParserRule) (str: string): parts.Part list option = _parser_parse.parse rule str

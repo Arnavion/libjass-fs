@@ -79,7 +79,7 @@ let main args =
 %s
     return {
         parser: {
-            parse: parser__get_parse$
+            parse: parser__parse
         }
     };
 });
