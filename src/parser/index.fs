@@ -21,7 +21,7 @@
 #light
 
 [<FunScript.JS>]
-module parser
+module libjass.parser
 
 type ParserRule = _parser_parse.ParserRule
 let parse (rule: ParserRule) (str: string): parts.Part list option = _parser_parse.parse rule str

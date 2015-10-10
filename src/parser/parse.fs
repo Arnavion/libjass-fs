@@ -23,7 +23,7 @@
 [<FunScript.JS>]
 module _parser_parse
 
-open types
+open libjass.parts
 
 
 let private (|StartsWith|_|) (prefix: string) (str: string): string option =

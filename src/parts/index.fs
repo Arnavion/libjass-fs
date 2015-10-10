@@ -20,8 +20,7 @@
 
 #light
 
-[<FunScript.JS>]
-module types
+namespace libjass.parts
 
 type EnableDisable = bool
 
