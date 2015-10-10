@@ -227,10 +227,8 @@ let private (|As_4c_tag|_|) (str: string): (ShadowColor * string) option =
 
 
 let private (|As_a_tag|_|) (str: string): (Alignment * string) option =
-    match str with
-    | StartsWith "a" (AsLegacyAlignmentValue (value, rest)) ->
-        fromLegacy value
-        |> Option.map (fun value -> ({ value = value }, rest))
+    match As_required_value "a" (|AsLegacyAlignmentValue|_|) (fun value -> fromLegacy value) str with
+    | Some (Some value, rest) -> Some ({ value = value }, rest)
     | _ -> None
 
 
