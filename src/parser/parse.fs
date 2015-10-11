@@ -620,27 +620,12 @@ and private parse_rec_braces (result: Part list) (str: string): Part list =
     | _ -> parse_rec_braces (Comment { value = str.[0..0] } :: result) str.[1..]
 
 
-type private Mergeable =
-    | Text of Text
-    | Comment of Comment
-
-
-let rec private mergeAdjacent (result: Part list) (lastSeen: Mergeable option) (parts: Part list): Part list =
+let rec private mergeAdjacent (result: Part list) (parts: Part list): Part list =
     match parts with
-    | [] ->
-        match lastSeen with
-        | Some (Mergeable.Text text) -> Part.Text text :: result
-        | Some (Mergeable.Comment comment) -> Part.Comment comment :: result
-        | None -> result
-    | current :: rest ->
-        match lastSeen, current with
-        | None, Part.Text t -> mergeAdjacent result (Some (Mergeable.Text t)) rest
-        | None, Part.Comment c -> mergeAdjacent result (Some (Mergeable.Comment c)) rest
-        | None, other -> mergeAdjacent (other :: result) None rest
-        | Some (Mergeable.Text t1), Part.Text t2 -> mergeAdjacent result (Some (Mergeable.Text { value = t2.value + t1.value })) rest
-        | Some (Mergeable.Text t), other -> mergeAdjacent (Part.Text t :: result) None parts
-        | Some (Mergeable.Comment c1), Part.Comment c2 -> mergeAdjacent result (Some (Mergeable.Comment { value = c2.value + c1.value })) rest
-        | Some (Mergeable.Comment c), other -> mergeAdjacent (Part.Comment c :: result) None parts
+    | [] -> result
+    | Part.Text t1 :: Part.Text t2 :: rest -> mergeAdjacent result ((Part.Text { value = t2.value + t1.value }) :: rest)
+    | Part.Comment c1 :: Part.Comment c2 :: rest -> mergeAdjacent result ((Part.Comment { value = c2.value + c1.value }) :: rest)
+    | other :: rest -> mergeAdjacent (other :: result) rest
 
 
 type ParserRule =
@@ -652,6 +637,6 @@ let parse (rule: ParserRule) (str: string): Part list option =
     | ParserRule.DialogueParts ->
         str
         |> parse_rec []
-        |> mergeAdjacent [] None
+        |> mergeAdjacent []
         |> Some
     | _ -> None
