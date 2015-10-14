@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   libjass-fs
 
@@ -85,8 +85,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\src\src.fsproj">
       <Name>src</Name>
       <Project>{6f6fccce-bbfc-4627-a7d9-b170e2e4aa6b}</Project>

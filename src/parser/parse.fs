@@ -1,4 +1,4 @@
-﻿(**
+(**
  * libjass-fs
  *
  * https://github.com/Arnavion/libjass-fs
