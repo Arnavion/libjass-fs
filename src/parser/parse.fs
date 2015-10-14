@@ -127,7 +127,7 @@ let private (|AsColorValue|_|) (str: string): (Color * string) option =
 
 let private (|AsColorWithAlphaValue|_|) (str: string): (Color * string) option =
     match str with
-    | ZeroOrMoreOf (Set.ofArray [|'&'; 'H'|]) (AsDecimalOrHexInt32 (value, ZeroOrMoreOf (Set.ofArray [|'&'; 'H'|]) rest)) ->
+    | AsDecimalOrHexInt32 (value, ZeroOrMoreOf (Set.ofArray [|'&'; 'H'|]) rest) ->
         Some ({ red = value &&& 0xFF; green = (value >>> 8) &&& 0xFF; blue = (value >>> 16) &&& 0xFF; alpha = 1.0 - float ((value >>> 24) &&& 0xFF) / 255.0; }, rest)
     | _ -> None
 
