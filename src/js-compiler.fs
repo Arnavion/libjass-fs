@@ -24,7 +24,7 @@ module js_compiler
 
 [<EntryPoint>]
 let main args =
-    let source = FunScript.Compiler.Compiler.Compile(<@ libjass.parser.parse @>, noReturn = true, components =
+    let source = FunScript.Compiler.Compiler.Compile(<@ [| libjass.parser.parse |] @>, noReturn = true, components =
         [
             FunScript.ExpressionReplacer.createUnsafe <@ OperatorIntrinsics.GetStringSlice @> <@ platform.Native.OperatorIntrinsics_GetStringSlice @>
             FunScript.ExpressionReplacer.createUnsafe <@ platform.Managed.StringToHexInt32 @> <@ platform.Native.StringToHexInt32 @>

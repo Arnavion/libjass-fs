@@ -26,7 +26,7 @@ module _parser_parse
 open libjass.parts
 
 
-let private (|StartsWith|_|) (prefix: string) (str: string): string option =
+let (|StartsWith|_|) (prefix: string) (str: string): string option =
     if str.StartsWith prefix then Some (str.[prefix.Length..]) else None
 
 
@@ -36,7 +36,7 @@ let private (|StartsWithOneOf|_|) (prefixes: string list) (str: string): string 
     |> Option.map (fun prefix -> str.[prefix.Length..])
 
 
-let private (|RegexMatch|_|) (pattern: string) (str: string): (string * string) option =
+let (|RegexMatch|_|) (pattern: string) (str: string): (string * string) option =
     let m = System.Text.RegularExpressions.Regex.Match(str, "^" + pattern)
     if m.Success
     then Some (m.Value, str.[m.Value.Length..])
@@ -125,7 +125,7 @@ let private (|AsColorValue|_|) (str: string): (Color * string) option =
     | _ -> None
 
 
-let private (|AsColorWithAlphaValue|_|) (str: string): (Color * string) option =
+let (|AsColorWithAlphaValue|_|) (str: string): (Color * string) option =
     match str with
     | AsDecimalOrHexInt32 (value, ZeroOrMoreOf (Set.ofArray [|'&'; 'H'|]) rest) ->
         Some ({ red = value &&& 0xFF; green = (value >>> 8) &&& 0xFF; blue = (value >>> 16) &&& 0xFF; alpha = 1.0 - float ((value >>> 24) &&& 0xFF) / 255.0; }, rest)
@@ -157,7 +157,7 @@ let private (|AsLegacyAlignmentValue|_|) (str: string): (LegacyAlignmentValue * 
     | _ -> None
 
 
-let private (|AsAlignmentValue|_|) (str: string): (AlignmentValue * string) option =
+let (|AsAlignmentValue|_|) (str: string): (AlignmentValue * string) option =
     if str.Length = 0 then None else
     match str.[0] with
     | c when c >= '1' && c <= '9' -> Some (enum<AlignmentValue> (System.Convert.ToInt32 c - System.Convert.ToInt32 '0'), str.[1..])

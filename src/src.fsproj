@@ -79,10 +79,17 @@
     <Compile Include="platform.fs" />
     <Compile Include="parts\index.fs" />
     <Compile Include="parser\parse.fs" />
+    <Compile Include="parser\stream-parsers.fs" />
     <Compile Include="parser\index.fs" />
+    <Compile Include="types\index.fs" />
     <Compile Include="js-compiler.fs" />
+    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Control.AsyncSeq">
+      <HintPath>..\packages\FSharp.Control.AsyncSeq.2.0.1\lib\net45\FSharp.Control.AsyncSeq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
