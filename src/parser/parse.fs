@@ -497,7 +497,7 @@ let private (|AsTransformableTags|_|) (str: string): (TransformableTag list * st
 
 
 (*
-// This simple and intuitive implementation unfortunately generates overly excessive branching in the resulting IL, necessitating the following separated-out implementation
+// This simple and intuitive implementation unfortunately generates overly excessive branching in the resulting JS, necessitating the following separated-out implementation
 
 let private (|As_t_tag|_|) (str: string): (Transform * string) option =
     match str with
