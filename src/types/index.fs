@@ -151,6 +151,29 @@ type Dialogue(style: Style, start: float, ``end``: float, layer: int, alignment:
         new Dialogue(style, start, ``end``, layer, alignment, text)
 
 
+type ASS(scriptProperties: ScriptProperties, styles: Map<string, Style>, dialogues: Dialogue list, stylesFormatSpecifier: string array option, dialoguesFormatSpecifier: string array option) =
+    member x.ScriptProperties = scriptProperties
+    member x.Styles = styles
+    member x.Dialogues = dialogues
+    member x.StylesFormatSpecifier = stylesFormatSpecifier
+    member x.DialoguesFormatSpecifier = dialoguesFormatSpecifier
+
+    member x.withScriptProperties (scriptProperties: ScriptProperties): ASS =
+        new ASS(scriptProperties, styles, dialogues, stylesFormatSpecifier, dialoguesFormatSpecifier)
+
+    member x.withStyle (style: Style): ASS =
+        new ASS(scriptProperties, Map.add style.name style styles, dialogues, stylesFormatSpecifier, dialoguesFormatSpecifier)
+
+    member x.withDialogue (dialogue: Dialogue): ASS =
+        new ASS(scriptProperties, styles, dialogues @ [dialogue], stylesFormatSpecifier, dialoguesFormatSpecifier)
+
+    member x.withStylesFormatSpecifier (stylesFormatSpecifier: string array): ASS =
+        new ASS(scriptProperties, styles, dialogues, Some stylesFormatSpecifier, dialoguesFormatSpecifier)
+
+    member x.withDialoguesFormatSpecifier (dialoguesFormatSpecifier: string array): ASS =
+        new ASS(scriptProperties, styles, dialogues, stylesFormatSpecifier, Some dialoguesFormatSpecifier)
+
+
 let rec styleFromTemplate_rec (style: Style) (name: string) (value: string): Style =
     match name, value with
     | "name", value ->
@@ -266,29 +289,6 @@ let styleFromTemplate (map: Map<string, string>): Style option =
     if style.name = "" then None else Some style
 
 
-type ASS(scriptProperties: ScriptProperties, styles: Map<string, Style>, dialogues: Dialogue list, stylesFormatSpecifier: string array option, dialoguesFormatSpecifier: string array option) =
-    member x.ScriptProperties = scriptProperties
-    member x.Styles = styles
-    member x.Dialogues = dialogues
-    member x.StylesFormatSpecifier = stylesFormatSpecifier
-    member x.DialoguesFormatSpecifier = dialoguesFormatSpecifier
-
-    member x.withScriptProperties (scriptProperties: ScriptProperties): ASS =
-        new ASS(scriptProperties, styles, dialogues, stylesFormatSpecifier, dialoguesFormatSpecifier)
-
-    member x.withStyle (style: Style): ASS =
-        new ASS(scriptProperties, Map.add style.name style styles, dialogues, stylesFormatSpecifier, dialoguesFormatSpecifier)
-
-    member x.withDialogue (dialogue: Dialogue): ASS =
-        new ASS(scriptProperties, styles, dialogues @ [dialogue], stylesFormatSpecifier, dialoguesFormatSpecifier)
-
-    member x.withStylesFormatSpecifier (stylesFormatSpecifier: string array): ASS =
-        new ASS(scriptProperties, styles, dialogues, Some stylesFormatSpecifier, dialoguesFormatSpecifier)
-
-    member x.withDialoguesFormatSpecifier (dialoguesFormatSpecifier: string array): ASS =
-        new ASS(scriptProperties, styles, dialogues, stylesFormatSpecifier, Some dialoguesFormatSpecifier)
-
-
 let rec dialogueFromTemplate_rec (ass: ASS) (dialogue: Dialogue) (name: string) (value: string): Dialogue =
     match name, value with
     | "style", value ->
@@ -336,30 +336,29 @@ type ASSParserState =
 | InSection of name: string
 
 type ASS with
-    static member fromStream (stream: IAsyncEnumerator<string>): Async<ASS> =
-        let streamParser = streams.nextLine stream
-        let rec parse chunk =
-            asyncSeq {
-                let! nextChunk = (streamParser chunk).MoveNext()
-                match nextChunk with
-                | Some (nextLine, rest) -> yield nextLine; yield! parse rest
-                | None -> ()
-            }
+    static member fromStream (stream: AsyncSeq<string>): Async<ASS> =
+        let lines = streams.getLines stream
 
-        let enumerator = (parse "").GetEnumerator()
-        let rec parser (state: ASSParserState) (ass: ASS) =
-            asyncSeq {
-                let! line = enumerator.MoveNext()
-                match line with
-                | None -> yield ass
-                | Some line ->
+        let defaultStyle = (styleFromTemplate (Map.add "name" "Default" Map.empty)).Value
+        let ass =
+            new ASS(
+                scriptProperties = new ScriptProperties(resolutionX = 0, resolutionY = 0, wrappingStyle = WrappingStyle.EndOfLineWrapping, scaleBorderAndShadow = true),
+                styles = Map.empty,
+                dialogues = List.empty,
+                stylesFormatSpecifier = None,
+                dialoguesFormatSpecifier = None)
+
+        let result =
+            lines
+            |> AsyncSeq.fold
+                (fun (ass: ASS, state) line ->
                     let line = if state = Beginning && line.Length > 0 && line.[0] = '\uFEFF' then line.[1..] else line
                     match line with
-                    | ""
-                    | ";" -> yield! parser state ass
+                    | "" -> ass, state
+                    | _parser_parse.StartsWith ";" rest -> ass, state
                     | _parser_parse.RegexMatch """\[[^]]+\]""" (value, rest) ->
                         let name = value.[1..value.Length - 2]
-                        yield! parser (InSection name) ass
+                        ass, InSection name
                     | line ->
                         match state with
                         | Beginning
@@ -368,66 +367,58 @@ type ASS with
                             | AsProperty (name, value) ->
                                 match name, value with
                                 | "PlayResX", _parser_parse.RegexMatch "[0-9]+" (value, "") ->
-                                    yield! parser state (value |> System.Convert.ToInt32 |> ass.ScriptProperties.withResolutionX |> ass.withScriptProperties)
+                                    (value |> System.Convert.ToInt32 |> ass.ScriptProperties.withResolutionX |> ass.withScriptProperties), state
                                 | "PlayResY", _parser_parse.RegexMatch "[0-9]+" (value, "") ->
-                                    yield! parser state (value |> System.Convert.ToInt32 |> ass.ScriptProperties.withResolutionY |> ass.withScriptProperties)
+                                    (value |> System.Convert.ToInt32 |> ass.ScriptProperties.withResolutionY |> ass.withScriptProperties), state
                                 | "WrapStyle", _parser_parse.RegexMatch "[0-3]" (value, "") ->
-                                    yield! parser state (value |> System.Convert.ToInt32 |> enum<WrappingStyle> |> ass.ScriptProperties.withWrappingStyle |> ass.withScriptProperties)
+                                    (value |> System.Convert.ToInt32 |> enum<WrappingStyle> |> ass.ScriptProperties.withWrappingStyle |> ass.withScriptProperties), state
                                 | "ScaledBorderAndShadow", _parser_parse.RegexMatch "yes" (value, "") ->
-                                    yield! parser state (true |> ass.ScriptProperties.withScaleBorderAndShadow |> ass.withScriptProperties)
+                                    (true |> ass.ScriptProperties.withScaleBorderAndShadow |> ass.withScriptProperties), state
                                 | "ScaledBorderAndShadow", _ ->
-                                    yield! parser state (false |> ass.ScriptProperties.withScaleBorderAndShadow |> ass.withScriptProperties)
+                                    (false |> ass.ScriptProperties.withScaleBorderAndShadow |> ass.withScriptProperties), state
                                 | _ ->
-                                    yield! parser state ass
+                                    ass, state
                             | _ ->
-                                yield! parser state ass
+                                ass, state
                         | InSection "V4+ Styles"
                         | InSection "V4 Styles" ->
                             match ass.StylesFormatSpecifier with
                             | None ->
                                 match line with
                                 | AsProperty ("Format", value) ->
-                                    yield! parser state (value.Split(',') |> Array.map (fun v -> v.Trim().ToLowerInvariant()) |> ass.withStylesFormatSpecifier)
+                                    (value.Split(',') |> Array.map (fun v -> v.Trim().ToLowerInvariant()) |> ass.withStylesFormatSpecifier), state
                                 | _ ->
-                                    yield! parser state ass
+                                    ass, state
                             | Some stylesFormatSpecifier ->
                                 match line with
                                 | AsProperty ("Style", AsMap stylesFormatSpecifier value) ->
                                     match styleFromTemplate value with
-                                    | Some style -> yield! parser state (style |> ass.withStyle)
-                                    | None -> yield! parser state ass
+                                    | Some style -> (style |> ass.withStyle), state
+                                    | None -> ass, state
                                 | _ ->
-                                    yield! parser state ass
+                                    ass, state
                         | InSection "Events" ->
                             match ass.DialoguesFormatSpecifier with
                             | None ->
                                 match line with
                                 | AsProperty ("Format", value) ->
-                                    yield! parser state (value.Split(',') |> Array.map (fun v -> v.Trim().ToLowerInvariant()) |> ass.withDialoguesFormatSpecifier)
+                                    (value.Split(',') |> Array.map (fun v -> v.Trim().ToLowerInvariant()) |> ass.withDialoguesFormatSpecifier), state
                                 | _ ->
-                                    yield! parser state ass
+                                    ass, state
                             | Some dialoguesFormatSpecifier ->
                                 match line with
                                 | AsProperty ("Dialogue", AsMap dialoguesFormatSpecifier value) ->
-                                    yield! parser state (value |> (dialogueFromTemplate ass) |> ass.withDialogue)
+                                    (value |> (dialogueFromTemplate ass) |> ass.withDialogue), state
                                 | _ ->
-                                    yield! parser state ass
+                                    ass, state
                         | _ ->
-                            yield! parser state ass
-            }
-
-        let defaultStyle = (styleFromTemplate (Map.add "name" "Default" Map.empty)).Value
-        let ass =
-            new ASS(
-                scriptProperties = new ScriptProperties(0, 0, WrappingStyle.EndOfLineWrapping, true),
-                styles = Map.empty,
-                dialogues = List.empty,
-                stylesFormatSpecifier = None,
-                dialoguesFormatSpecifier = None)
+                            ass, state
+                )
+                (ass.withStyle defaultStyle, Beginning)
 
         async {
-            let! x = parser Beginning (ass.withStyle defaultStyle) |> AsyncSeq.tryFirst
-            return x.Value
+            let! ass, state = result
+            return ass
         }
 
     static member fromStreamReader (streamReader: System.IO.StreamReader): Async<ASS> =
@@ -440,7 +431,7 @@ type ASS with
                     yield! getChunks()
             }
 
-        ASS.fromStream (getChunks().GetEnumerator())
+        getChunks() |> ASS.fromStream
 
     static member fromFile (filename: string): Async<ASS> =
         async {
@@ -450,7 +441,4 @@ type ASS with
         }
 
     static member fromString (str: string): Async<ASS> =
-        ASS.fromStream ((AsyncSeq.ofSeq (seq {
-            yield str
-        })).GetEnumerator())
-
+        AsyncSeq.singleton str |> ASS.fromStream

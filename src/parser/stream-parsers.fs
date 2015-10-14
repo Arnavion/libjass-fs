@@ -23,32 +23,43 @@
 [<FunScript.JS>]
 module libjass.streams
 
-
 open FSharp.Control
 
+let inline unchunkify (func: 'T -> ('T * 'T) option) (initial: 'T) (sequence: AsyncSeq<'T>): AsyncSeq<'T> =
+    let enumerator = sequence.GetEnumerator()
 
-let private (|Line|_|) (str: string): (string * string) option =
-    let newLineIndex = str.IndexOf('\n')
-    if newLineIndex = -1
-    then None
-    else
-        let line = str.[0..newLineIndex - 1]
-        if line.EndsWith("\r") then
-            Some (line.[0..line.Length - 2], str.[newLineIndex + 1..])
-        else
-            Some (line, str.[newLineIndex + 1..])
-
-let rec private nextLine_rec (stream: IAsyncEnumerator<string>) (buffer: string): AsyncSeq<string * string> =
-    asyncSeq {
-        match buffer with
-        | Line (line, rest) -> yield line, rest
-        | rest ->
-            let! nextChunk = stream.MoveNext()
-            match nextChunk with
-            | Some chunk -> yield! nextLine_rec stream (rest + chunk)
+    let rec pullNext (state: 'T) =
+        asyncSeq {
+            let! next = enumerator.MoveNext()
+            match next with
+            | Some element ->
+                yield! pushNext (state + element)
             | None ->
-                if buffer <> "" then yield buffer, ""
-    }
+                yield state
+        }
+    and pushNext (state: 'T) =
+        asyncSeq {
+            let next = func state
+            match next with
+            | Some (result, state) ->
+                yield result
+                yield! pushNext state
+            | None ->
+                yield! pullNext state
+        }
 
-let nextLine (stream: IAsyncEnumerator<string>) (buffer: string): IAsyncEnumerator<string * string> =
-    (nextLine_rec stream buffer).GetEnumerator()
+    pullNext initial
+
+let getLines (stream: AsyncSeq<string>): AsyncSeq<string> =
+    stream
+    |> unchunkify
+        (fun chunk ->
+            match chunk.IndexOf('\n') with
+            | -1 -> None
+            | index ->
+                if chunk.[index - 1] = '\r' then
+                    Some (chunk.[0..index - 2], chunk.[index + 1..])
+                else
+                    Some (chunk.[0..index - 1], chunk.[index + 1..])
+        )
+        ""
