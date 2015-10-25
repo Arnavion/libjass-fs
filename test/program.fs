@@ -26,16 +26,30 @@ open FSharp.Control
 
 [<EntryPoint>]
 let main args =
+    (*
     let input = "{\\\\k0}{\\1c&H35C2BD&}s{\\1c&H53A2C0&}e{\\1c&H757FC4&}i{\\1c&H866EC6&}j{\\1c&H995AC8&}a{\\1c&HBC36CC&}k{\\1c&HD420C8&}u{\\1c&HB942A7&} {\\1c&HA25F8A&}w{\\1c&H799356&}a{\\1c&H63B03A&} {\\1c&H54C723&}k{\\1c&H68C126&}i{\\1c&H7BBC29&}r{\\1c&H8CB82C&}i{\\1c&HA2B230&}s{\\1c&HBEAB34&}a{\\1c&HD8A339&}k{\\1c&HB68D3B&}u{\\1c&HA4813C&} {\\1c&H88703E&}y{\\1c&H665A41&}o{\\1c&H444444&"
     let input = "abc{\\1cdeqrs}ghi"
     //let input = "{\\a5}"
     match libjass.parser.parse libjass.parser.ParserRule.DialogueParts input with
     | Some parts -> List.map (printfn "%A") parts |> ignore
     | None -> eprintfn "Parse failed!"
+    *)
 
     let ass =
         libjass.types.ASS.fromFile """G:\server\video\gc-01.ass"""
         |> Async.RunSynchronously
-    ass |> printfn "%A"
+
+    ass.ScriptProperties |> printfn """Script properties
+%A
+
+"""
+
+    ass.Styles |> printfn """Styles
+%A
+
+"""
+
+    printfn "Dialogues"
+    ass.Dialogues |> List.iteri (fun index dialogue -> printfn "[%A] %A-%A %A" index dialogue.Start dialogue.End dialogue.Parts)
 
     0
