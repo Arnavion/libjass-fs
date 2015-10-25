@@ -25,10 +25,10 @@ module libjass.streams
 
 open FSharp.Control
 
-let inline unchunkify (func: 'T -> ('T * 'T) option) (initial: 'T) (sequence: AsyncSeq<'T>): AsyncSeq<'T> =
+let inline reassemble (func: 'T -> ('T * 'T) option) (initial: 'T) (sequence: AsyncSeq<'T>): AsyncSeq<'T> =
     let enumerator = sequence.GetEnumerator()
 
-    let rec pullNext (state: 'T) =
+    let rec pullNext state =
         asyncSeq {
             let! next = enumerator.MoveNext()
             match next with
@@ -37,7 +37,7 @@ let inline unchunkify (func: 'T -> ('T * 'T) option) (initial: 'T) (sequence: As
             | None ->
                 yield state
         }
-    and pushNext (state: 'T) =
+    and pushNext state =
         asyncSeq {
             let next = func state
             match next with
@@ -48,11 +48,11 @@ let inline unchunkify (func: 'T -> ('T * 'T) option) (initial: 'T) (sequence: As
                 yield! pullNext state
         }
 
-    pullNext initial
+    pushNext initial
 
 let getLines (stream: AsyncSeq<string>): AsyncSeq<string> =
     stream
-    |> unchunkify
+    |> reassemble
         (fun chunk ->
             match chunk.IndexOf('\n') with
             | -1 -> None
