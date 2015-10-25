@@ -26,17 +26,17 @@ module libjass.types
 open FSharp.Control
 
 
-let (|AsFloat|_|) (str: string): float option =
+let private (|AsFloat|_|) (str: string): float option =
     let mutable result = 0.0
     if System.Double.TryParse(str, &result) then
         Some result
     else
         None
 
-let (|AsTime|) (str: string): float =
+let private (|AsTime|) (str: string): float =
     str.Split(':') |> Array.fold (fun previous current -> previous * 60.0 + (System.Convert.ToDouble current)) 0.0
 
-let (|AsProperty|_|) (str: string): (string * string) option =
+let private (|AsProperty|_|) (str: string): (string * string) option =
     let colonPos = str.IndexOf(":")
     if colonPos = -1 then None
     else
@@ -45,7 +45,7 @@ let (|AsProperty|_|) (str: string): (string * string) option =
         Some (name, value)
 
 
-let (|AsMap|_|) (formatSpecifier: string array) (str: string): Map<string, string> option =
+let private (|AsMap|_|) (formatSpecifier: string array) (str: string): Map<string, string> option =
     let components = str.Split(',')
     if components.Length < formatSpecifier.Length then None
     else
@@ -174,7 +174,7 @@ type ASS(scriptProperties: ScriptProperties, styles: Map<string, Style>, dialogu
         new ASS(scriptProperties, styles, dialogues, stylesFormatSpecifier, Some dialoguesFormatSpecifier)
 
 
-let rec styleFromTemplate_rec (style: Style) (name: string) (value: string): Style =
+let rec private styleFromTemplate_rec (style: Style) (name: string) (value: string): Style =
     match name, value with
     | "name", value ->
         { style with name = value.TrimStart('*') }
@@ -249,7 +249,7 @@ let rec styleFromTemplate_rec (style: Style) (name: string) (value: string): Sty
         eprintfn "Unknown property %s for style %s" name style.name
         style
 
-let styleFromTemplate (map: Map<string, string>): Style option =
+let private styleFromTemplate (map: Map<string, string>): Style option =
     let style = {
         name = ""
 
@@ -289,7 +289,7 @@ let styleFromTemplate (map: Map<string, string>): Style option =
     if style.name = "" then None else Some style
 
 
-let rec dialogueFromTemplate_rec (ass: ASS) (dialogue: Dialogue) (name: string) (value: string): Dialogue =
+let rec private dialogueFromTemplate_rec (ass: ASS) (dialogue: Dialogue) (name: string) (value: string): Dialogue =
     match name, value with
     | "style", value ->
         match ass.Styles.TryFind(value) with
@@ -321,7 +321,7 @@ let rec dialogueFromTemplate_rec (ass: ASS) (dialogue: Dialogue) (name: string) 
         eprintfn "Unknown property %s for dialogue" name
         dialogue
 
-let dialogueFromTemplate (ass: ASS) (map: Map<string, string>): Dialogue =
+let private dialogueFromTemplate (ass: ASS) (map: Map<string, string>): Dialogue =
     match ass.Styles.TryFind("Default") with
     | Some style ->
         let dialogue = new Dialogue(style = style, start = 0.0, ``end`` = 0.0, layer = 0, alignment = parts.AlignmentValue.BottomCenter, text = "")
@@ -331,7 +331,7 @@ let dialogueFromTemplate (ass: ASS) (map: Map<string, string>): Dialogue =
         failwith "Default style not found in ASS"
 
 
-type ASSParserState =
+type private ASSParserState =
 | Beginning
 | InSection of name: string
 
