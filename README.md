@@ -1,3 +1,9 @@
+This repository is no longer maintained.
+
+If you have questions about this repository, open an issue at https://github.com/Arnavion/archived-repos-issues
+
+---
+
 An F# port of some of [libjass](https://github.com/Arnavion/libjass) that uses FunScript to compile itself to JavaScript.
 
 
